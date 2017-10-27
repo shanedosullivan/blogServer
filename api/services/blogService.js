@@ -3,15 +3,21 @@
 var mongoose = require('mongoose'),
   DocumentMongoose = mongoose.model('Document');
 
-exports.list = function() {
-	return new Promise(function (resolve, reject){
-	  DocumentMongoose.find({}, function(err, documents) {
-	      if (err) 
-	        reject(Error("Could not retrieve list of blogs"));
-	      
-	      resolve(documents);
-	    });
-	});
+exports.list = function(keyword) {
+
+	if(keyword){
+		return search(keyword)
+	}
+	else {
+		return new Promise(function (resolve, reject){
+		  DocumentMongoose.find({}, function(err, documents) {
+		      if (err) 
+		        reject(Error("Could not retrieve list of blogs"));
+		      
+		      resolve(documents);
+		    });
+		});
+	}
 };
 
 exports.getById = function(id) {
@@ -27,8 +33,6 @@ exports.getById = function(id) {
 
 exports.save = function(document) {
 	return new Promise(function (resolve, reject){
-		console.log("Text extraction done, trying to save..." + document);
-
 		  var documentMongoose = new DocumentMongoose({text_body: document});
 		  documentMongoose.save(function(err, savedDocument) {
 		    if (err)
@@ -39,24 +43,37 @@ exports.save = function(document) {
 	});
 };
 
-// exports.update = function(document, id) {
-// 	return new Promise(function (resolve, reject)){
-// 		  UserMongoose.findOneAndUpdate({_id: id}, document, {new: true}, function(err, updatedDocument) {
-// 		    if (err)
-// 		      reject(Error("Could not update blog with id: "+ id));
-		    
-// 		    resolve(updatedDocument);
-//   		});
-// 	});
-// };
+exports.update = function(document, id) {
+	return new Promise(function (resolve, reject){
+		console.log("Doc: "+document);
+		  DocumentMongoose.findOneAndUpdate({_id: id}, {text_body: document}, {new: true}, function(err, updatedDocument) {
+		    if (err){
+		    	console.log(err);
+		        reject(Error("Could not update blog with id: "+ id));
+		    }
+		    resolve(updatedDocument);
+  		});
+	});
+};
 
-// exports.delete = function(id){
-// 	return new Promise(function (resolve, reject)){
-// 		UserMongoose.remove({_id: id}, function(err, user) {
-// 		    if (err)
-// 		      reject(Error("Could not delete blog with id: "+id));
+exports.delete = function(id){
+	return new Promise(function (resolve, reject){
+		DocumentMongoose.remove({_id: id}, function(err, user) {
+		    if (err)
+		      reject(Error("Could not delete blog with id: "+id));
 
-// 		    resolve({ message: 'Blog with id ' +id+ ' successfully deleted' });
-// 		  });
-// 	});
-// };
+		    resolve({ message: 'Blog with id ' +id+ ' successfully deleted' });
+		  });
+	});
+};
+
+var search = function(keyword){
+	return new Promise(function(resolve, reject){
+		DocumentMongoose.find({text_body:{ $regex: keyword, $options: "i"}}, function(err, results) {
+			if (err)
+		      reject(Error("Could not search blogs for keyword: "+ keyword));
+
+		    resolve(results);
+		});
+	});
+};

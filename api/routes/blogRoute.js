@@ -11,7 +11,7 @@ module.exports = function(app) {
 
   app.route('/document/:documentId')
     .get(blogController.getById)
-  //  .put(blogController.update)
-  //  .delete(blogController.delete);
+    .put(blogController.update)
+    .delete(blogController.delete);
 
 };

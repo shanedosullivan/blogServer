@@ -28,6 +28,11 @@
   "dependencies": {
     "express": "^4.15.3",
     "express-fileupload": "^0.1.4",
-    "mongoose": "^4.11.1"
+    "mongoose": "^4.11.1",
+    "log4js": "^2.3.3",
+    "formidable": "^1.1.1",
+    "promise": "^8.0.1",
+    "textract": "^2.1.2",
+    "nodemon": "^1.11.0"
   }
 }

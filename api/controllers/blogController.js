@@ -8,7 +8,9 @@ var fileUpload = require('express-fileupload');
 
 exports.list = function(req, res) {
 
-	blogService.list().then(function(documents) {
+	var keyword = req.query.keyword;
+
+	blogService.list(keyword).then(function(documents) {
   		res.json(documents);
 	})
 	.catch(function (error) {
@@ -18,7 +20,7 @@ exports.list = function(req, res) {
 };
 
 exports.getById = function(req, res) {
-	blogService.getById(req.params.userId).then(function(document) {
+	blogService.getById(req.params.documentId).then(function(document) {
   		res.json(document);
 	})
 	.catch(function (error) {
@@ -30,7 +32,6 @@ exports.save = function(req, res) {
 	if (!req.files)
 	    return res.status(400).send('No files were uploaded.');
 
-console.log("Type: " + req.files.file.mimetype);
 	documentService.extractText(req.files.file.mimetype, req.files.file.data).then(function(bufferText){
 		return blogService.save(bufferText);
 	}).then(function() {
@@ -40,21 +41,24 @@ console.log("Type: " + req.files.file.mimetype);
 	});
 };
 
-// exports.update = function(req, res) {
+exports.update = function(req, res) {
+	if (!req.files)
+	    return res.status(400).send('No files were uploaded.');
 
-// 	blogService.update(req.body).then(function(document, req.params.documentId) {
-//   		res.json(document);
-// 	})
-// 	.catch(function (error) {
-//         res.send(error.message);
-//     });
-// };
+	documentService.extractText(req.files.file.mimetype, req.files.file.data).then(function(bufferText){
+		return blogService.update(bufferText, req.params.documentId);
+	}).then(function() {
+		res.json(req.files.file.name + " was updated successfully!");
+	}).catch(function(error) {
+		res.send(error.message);
+	});
+};
 
-// exports.delete = function(req, res) {
-// 	blogService.delete(req.params.documentId).then(function(message) {
-// 		res.json(message);
-// 	})
-// 	.catch(function (error) {
-//         res.send(error.message);
-//     });
-// };
+exports.delete = function(req, res) {
+	blogService.delete(req.params.documentId).then(function(message) {
+		res.json(message);
+	})
+	.catch(function (error) {
+        res.send(error.message);
+    });
+};
